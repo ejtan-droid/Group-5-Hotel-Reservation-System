@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rooms — Auberge de Grandeur</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .filter-bar {
+      background: white; border-radius: var(--radius-md);
+      padding: 18px 24px; margin-bottom: 28px;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      box-shadow: 0 2px 12px rgba(91,51,23,0.06);
+    }
+    .filter-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+    .filter-btn {
+      padding: 7px 16px; border-radius: 20px;
+      border: 1.5px solid #e8ddd4; background: white;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--text-muted); cursor: pointer; transition: var(--transition);
+    }
+    .filter-btn:hover, .filter-btn.active { border-color: var(--gold); color: var(--brown-dark); background: rgba(201,168,76,0.08); }
+
+    .room-img-block {
+      width: 100%; height: 200px; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .room-img-inner {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 2rem; font-weight: 300;
+      color: rgba(245,230,200,0.55); letter-spacing: 0.06em;
+    }
+    .room-type-badge {
+      position: absolute; top: 14px; left: 14px; z-index: 1;
+      background: rgba(26,15,7,0.7); backdrop-filter: blur(6px);
+      color: var(--gold); padding: 4px 12px; border-radius: 20px;
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+      border: 1px solid rgba(201,168,76,0.3);
+    }
+    .availability-badge { position: absolute; top: 14px; right: 14px; z-index: 1; }
+    .room-body { padding: 20px; }
+    .room-price { font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; color: var(--brown-dark); }
+    .room-price span { font-size: 0.82rem; font-weight: 400; color: var(--text-muted); font-family: var(--font-body); }
+    .room-desc { font-size: 0.84rem; color: var(--text-muted); line-height: 1.6; margin: 8px 0 16px; }
+    .room-meta { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; font-size: 0.78rem; color: var(--text-muted); }
+    .room-meta svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(26,15,7,0.7); backdrop-filter: blur(4px);
+      z-index: 1000; display: none;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+    .modal-box {
+      background: white; border-radius: var(--radius-lg);
+      padding: 36px; max-width: 480px; width: 100%;
+      box-shadow: var(--shadow-dark); position: relative;
+      animation: slideUp 0.25s ease;
+    }
+    .modal-close-btn {
+      position: absolute; top: 16px; right: 18px;
+      background: none; font-size: 1.4rem; color: var(--text-muted);
+      cursor: pointer; line-height: 1; border: none; transition: var(--transition);
+    }
+    .modal-close-btn:hover { color: var(--brown-dark); }
+    .modal-title { font-family: var(--font-display); font-size: 1.6rem; font-weight: 400; color: var(--brown-dark); margin-bottom: 4px; }
+    .modal-subtitle { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 20px; }
+    .cost-preview {
+      background: linear-gradient(135deg, var(--brown-dark), var(--brown-mid));
+      border-radius: var(--radius-sm); padding: 16px 20px; margin-bottom: 20px;
+      display: none;
+    }
+    .cost-preview.show { display: flex; align-items: center; justify-content: space-between; }
+    .cost-preview-label { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); }
+    .cost-preview-amount { font-family: var(--font-display); font-size: 1.6rem; color: white; }
+    .cost-preview-detail { font-size: 0.75rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-slot"></div>
+  <div class="main-content">
+    <div id="topbar-slot"></div>
+    <div class="page-content">
+
+      <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-btn active" onclick="filterRooms('all', this)">All Rooms</button>
+        <button class="filter-btn" onclick="filterRooms('Standard', this)">Standard</button>
+        <button class="filter-btn" onclick="filterRooms('Deluxe', this)">Deluxe</button>
+        <button class="filter-btn" onclick="filterRooms('Suite', this)">Suite</button>
+        <button class="filter-btn" onclick="filterRooms('available', this)">Available Only</button>
+      </div>
+
+      <div class="rooms-grid" id="rooms-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Reserve Modal -->
+<div class="modal-overlay" id="reserve-modal" onclick="handleOverlayClick(event)">
+  <div class="modal-box" id="modal-box">
+    <button class="modal-close-btn" onclick="closeModal()" aria-label="Close">&times;</button>
+    <div class="modal-title" id="modal-title">Reserve Room</div>
+    <div class="modal-subtitle" id="modal-subtitle"></div>
+    <div class="divider"></div>
+
+    <div class="form-group">
+      <label>Check-in Date</label>
+      <input type="date" class="form-control" id="modal-checkin" onchange="updateCostPreview()" />
+    </div>
+    <div class="form-group">
+      <label>Check-out Date</label>
+      <input type="date" class="form-control" id="modal-checkout" onchange="updateCostPreview()" />
+    </div>
+
+    <div class="cost-preview" id="cost-preview">
+      <div>
+        <div class="cost-preview-label">Estimated Total</div>
+        <div class="cost-preview-detail" id="cost-detail"></div>
+      </div>
+      <div class="cost-preview-amount" id="cost-amount"></div>
+    </div>
+
+    <button class="btn btn-primary btn-full" onclick="confirmReservation()">Confirm Reservation</button>
+    <button class="btn btn-full mt-8" style="background:none;border:1.5px solid #e8ddd4;color:var(--text-muted)" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script src="../js/nav.js"></script>
+<script>
+  let currentUser, currentRoomNumber, currentRoomPrice, currentFilter = 'all';
+  currentUser = initPage('rooms', 'Rooms');
+
+  function renderRooms(filter) {
+    const rooms = Store.getRooms();
+    const grid  = document.getElementById('rooms-grid');
+    const filtered = rooms.filter(r => {
+      if (filter === 'available') return r.available;
+      if (filter === 'all') return true;
+      return r.type === filter;
+    });
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);font-size:0.9rem">
+        No rooms match this filter.</div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(room => `
+      <div class="room-card">
+        <div class="room-img-block">
+          <div class="room-img-inner" style="background:${getRoomGradient(room.type)}">${room.type}</div>
+          <div class="room-type-badge">${room.type}</div>
+          <div class="availability-badge">
+            <span class="badge ${room.available ? 'badge-green' : 'badge-red'}">
+              ${room.available ? 'Available' : 'Booked'}
+            </span>
+          </div>
+        </div>
+        <div class="room-body">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+            <div>
+              <div style="font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px">Room Number</div>
+              <div style="font-family:var(--font-display);font-size:1.3rem;color:var(--brown-dark)">#${room.roomNumber}</div>
+            </div>
+            <div class="room-price">${UI.formatCurrency(room.pricePerNight)}<span>/night</span></div>
+          </div>
+          <div class="room-meta">
+            <div style="display:flex;align-items:center;gap:4px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              Up to ${room.capacity} guests
+            </div>
+          </div>
+          <div class="room-desc">${room.description}</div>
+          <button
+            class="btn btn-full ${room.available ? 'btn-primary' : ''}"
+            style="${!room.available ? 'background:#f0e8e0;color:var(--text-muted);cursor:not-allowed' : ''}"
+            ${!room.available ? 'disabled' : ''}
+            onclick="${room.available ? `openModal(${room.roomNumber},'${room.type}',${room.pricePerNight})` : ''}">
+            ${room.available ? 'Reserve Room' : 'Not Available'}
+          </button>
+        </div>
+      </div>`).join('');
+  }
+
+  function filterRooms(type, btn) {
+    currentFilter = type;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderRooms(type);
+  }
+
+  function openModal(roomNumber, roomType, price) {
+    currentRoomNumber = roomNumber;
+    currentRoomPrice  = price;
+    document.getElementById('modal-title').textContent    = `Reserve ${roomType} Room`;
+    document.getElementById('modal-subtitle').textContent = `Room #${roomNumber} — ${UI.formatCurrency(price)} per night`;
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('modal-checkin').min   = today;
+    document.getElementById('modal-checkout').min  = today;
+    document.getElementById('modal-checkin').value  = '';
+    document.getElementById('modal-checkout').value = '';
+    document.getElementById('cost-preview').classList.remove('show');
+    document.getElementById('reserve-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('reserve-modal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('reserve-modal')) closeModal();
+  }
+
+  function updateCostPreview() {
+    const ci = document.getElementById('modal-checkin').value;
+    const co = document.getElementById('modal-checkout').value;
+    if (!ci || !co) { document.getElementById('cost-preview').classList.remove('show'); return; }
+    const nights = Math.ceil((new Date(co) - new Date(ci)) / 86400000);
+    if (nights <= 0) { document.getElementById('cost-preview').classList.remove('show'); return; }
+    const total = nights * currentRoomPrice;
+    document.getElementById('cost-amount').textContent = UI.formatCurrency(total);
+    document.getElementById('cost-detail').textContent = `${nights} night${nights > 1 ? 's' : ''} × ${UI.formatCurrency(currentRoomPrice)}`;
+    document.getElementById('cost-preview').classList.add('show');
+  }
+
+  function confirmReservation() {
+    const ci = document.getElementById('modal-checkin').value;
+    const co = document.getElementById('modal-checkout').value;
+    if (!ci || !co) { UI.showToast('Please select both check-in and check-out dates.', 'error'); return; }
+    if (new Date(co) <= new Date(ci)) { UI.showToast('Check-out must be after check-in.', 'error'); return; }
+    const nights = Math.ceil((new Date(co) - new Date(ci)) / 86400000);
+    const result = Bookings.create(currentUser, currentRoomNumber, ci, co, nights);
+    if (result.success) {
+      closeModal();
+      UI.showToast(`Room reserved successfully! Reservation #${result.reservation.reservationId}`, 'success');
+      renderRooms(currentFilter);
+    } else {
+      UI.showToast(result.message, 'error');
+    }
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  renderRooms('all');
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Billing — Auberge de Grandeur</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .billing-selector {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 24px 28px;
+      box-shadow: 0 2px 12px rgba(91,51,23,0.06);
+      margin-bottom: 24px;
+    }
+    .billing-card {
+      background: white;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(91,51,23,0.06);
+    }
+    .billing-header {
+      background: linear-gradient(135deg, var(--brown-dark), var(--brown-mid));
+      padding: 28px 32px;
+      color: white;
+    }
+    .billing-hotel {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      color: var(--gold-light);
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+    .billing-subtitle {
+      font-size: 0.75rem;
+      color: rgba(245,230,200,0.5);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .billing-body { padding: 32px; }
+    .billing-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    .billing-field label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .billing-field .value {
+      font-size: 0.92rem;
+      color: var(--brown-dark);
+      font-weight: 500;
+    }
+    .line-items { margin-bottom: 24px; }
+    .line-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0e8e0;
+      font-size: 0.88rem;
+    }
+    .line-item:last-child { border-bottom: none; }
+    .line-item-label { color: var(--text-muted); }
+    .line-item-amount { color: var(--brown-dark); font-weight: 500; }
+    .billing-total {
+      background: linear-gradient(135deg, var(--brown-dark), var(--brown-rich));
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .billing-total-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .billing-total-amount {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      color: white;
+    }
+    .empty-billing {
+      padding: 56px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+    .print-btn { float: right; }
+    @media print {
+      .sidebar, .topbar, .billing-selector, .print-btn { display: none !important; }
+      .main-content { margin-left: 0; }
+      .page-content { padding: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-slot"></div>
+  <div class="main-content">
+    <div id="topbar-slot"></div>
+    <div class="page-content">
+
+      <div class="billing-selector">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <div class="form-group" style="margin:0;flex:1;min-width:200px">
+            <label>Select Reservation</label>
+            <select class="form-control" id="res-select" onchange="loadBilling()">
+              <option value="">-- Choose a reservation --</option>
+            </select>
+          </div>
+          <button class="btn btn-outline btn-sm print-btn" onclick="window.print()">Print Receipt</button>
+        </div>
+      </div>
+
+      <div id="billing-output">
+        <div class="empty-billing">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d4c4b8" stroke-width="1.2" stroke-linecap="round" style="margin-bottom:12px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Select a reservation to view your billing summary.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script src="../js/nav.js"></script>
+<script>
+  const user = initPage('billing', 'Billing');
+
+  function populateSelect() {
+    const reservations = Bookings.getForUser(user.username);
+    const sel = document.getElementById('res-select');
+    sel.innerHTML = '<option value="">-- Choose a reservation --</option>';
+    reservations.forEach(r => {
+      sel.innerHTML += `<option value="${r.reservationId}">
+        #${r.reservationId} — ${r.roomType} #${r.roomNumber} (${UI.formatDate(r.checkIn)} – ${UI.formatDate(r.checkOut)})
+      </option>`;
+    });
+  }
+
+  function loadBilling() {
+    const id = parseInt(document.getElementById('res-select').value);
+    if (!id) {
+      document.getElementById('billing-output').innerHTML = `
+        <div class="empty-billing">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d4c4b8" stroke-width="1.2" stroke-linecap="round" style="margin-bottom:12px"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Select a reservation to view your billing summary.
+        </div>`; return;
+    }
+
+    const reservations = Bookings.getForUser(user.username);
+    const res = reservations.find(r => r.reservationId === id);
+    if (!res) return;
+
+    const services = Services.getForUser(user.username);
+    const bill = Billing.generate(res, services);
+
+    const svcRows = services.length > 0 ? services.map(s => `
+      <div class="line-item">
+        <span class="line-item-label">${s.serviceName}</span>
+        <span class="line-item-amount">${UI.formatCurrency(s.cost)}</span>
+      </div>`).join('') : `
+      <div class="line-item">
+        <span class="line-item-label" style="font-style:italic">No services requested</span>
+        <span class="line-item-amount">${UI.formatCurrency(0)}</span>
+      </div>`;
+
+    document.getElementById('billing-output').innerHTML = `
+      <div class="billing-card">
+        <div class="billing-header">
+          <div class="billing-hotel">Auberge de Grandeur</div>
+          <div class="billing-subtitle">Official Billing Statement</div>
+          <div style="margin-top:16px;font-size:0.78rem;color:rgba(245,230,200,0.4)">
+            Reservation #${bill.reservationId} &bull; Generated ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}
+          </div>
+        </div>
+        <div class="billing-body">
+          <div class="billing-info-grid">
+            <div class="billing-field"><label>Guest Name</label><div class="value">${bill.guestName}</div></div>
+            <div class="billing-field"><label>Room</label><div class="value">${bill.roomType} Room #${bill.roomNumber}</div></div>
+            <div class="billing-field"><label>Check-in</label><div class="value">${UI.formatDate(bill.checkIn)}</div></div>
+            <div class="billing-field"><label>Check-out</label><div class="value">${UI.formatDate(bill.checkOut)}</div></div>
+            <div class="billing-field"><label>Duration</label><div class="value">${bill.nights} night${bill.nights>1?'s':''}</div></div>
+            <div class="billing-field"><label>Status</label><div class="value"><span class="badge badge-green">${res.status}</span></div></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="line-items">
+            <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin-bottom:12px">Charges</div>
+            <div class="line-item">
+              <span class="line-item-label">Room Charge (${bill.nights} night${bill.nights > 1?'s':''} × ${UI.formatCurrency(res.pricePerNight)})</span>
+              <span class="line-item-amount">${UI.formatCurrency(bill.roomCost)}</span>
+            </div>
+            <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin:16px 0 12px">
+              Services
+            </div>
+            ${svcRows}
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="line-item" style="padding:8px 0">
+            <span class="line-item-label">Room Subtotal</span>
+            <span class="line-item-amount">${UI.formatCurrency(bill.roomCost)}</span>
+          </div>
+          <div class="line-item" style="padding:8px 0;margin-bottom:16px">
+            <span class="line-item-label">Services Subtotal</span>
+            <span class="line-item-amount">${UI.formatCurrency(bill.servicesCost)}</span>
+          </div>
+
+          <div class="billing-total">
+            <div class="billing-total-label">Grand Total</div>
+            <div class="billing-total-amount">${UI.formatCurrency(bill.total)}</div>
+          </div>
+
+          <div style="margin-top:20px;text-align:center;font-size:0.75rem;color:var(--text-muted);letter-spacing:0.06em">
+            Thank you for choosing Auberge de Grandeur &bull; We hope to see you again
+          </div>
+        </div>
+      </div>`;
+  }
+
+  populateSelect();
+</script>
+</body>
+</html>

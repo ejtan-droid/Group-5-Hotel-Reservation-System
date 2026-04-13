@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reservation — Auberge de Grandeur</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .section-card {
+      background: white;
+      border-radius: var(--radius-md);
+      box-shadow: 0 2px 12px rgba(91,51,23,0.06);
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .section-card-header {
+      padding: 20px 28px;
+      border-bottom: 1px solid #f0e8e0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .section-card-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      color: var(--brown-dark);
+    }
+    .book-form {
+      padding: 28px;
+    }
+    .book-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .cost-box {
+      background: linear-gradient(135deg, var(--brown-dark), var(--brown-mid));
+      border-radius: var(--radius-sm);
+      padding: 20px 24px;
+      color: white;
+      margin-top: 16px;
+    }
+    .cost-box-label { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+    .cost-box-amount { font-family: var(--font-display); font-size: 2rem; color: white; }
+    .empty-res {
+      padding: 56px;
+      text-align: center;
+    }
+    .cancel-btn {
+      background: none;
+      border: 1px solid #e8ddd4;
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .cancel-btn:hover { border-color: #c0392b; color: #c0392b; }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar-slot"></div>
+  <div class="main-content">
+    <div id="topbar-slot"></div>
+    <div class="page-content">
+
+      <!-- Book a Room Form -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="section-card-title">Book a Room</div>
+          <a href="rooms.html" class="btn btn-outline btn-sm">Browse Rooms</a>
+        </div>
+        <div class="book-form">
+          <div class="book-form-grid">
+            <div class="form-group">
+              <label>Select Room</label>
+              <select class="form-control" id="select-room" onchange="updateCost()">
+                <option value="">-- Choose a room --</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:12px">
+              <div class="form-group" style="flex:1">
+                <label>Check-in Date</label>
+                <input type="date" class="form-control" id="checkin" onchange="updateCost()" />
+              </div>
+              <div class="form-group" style="flex:1">
+                <label>Check-out Date</label>
+                <input type="date" class="form-control" id="checkout" onchange="updateCost()" />
+              </div>
+            </div>
+          </div>
+
+          <div class="cost-box" id="cost-box" style="display:none">
+            <div class="cost-box-label">Estimated Total</div>
+            <div class="cost-box-amount" id="cost-amount"></div>
+            <div style="font-size:0.8rem;color:rgba(255,255,255,0.5);margin-top:4px" id="cost-detail"></div>
+          </div>
+
+          <div style="margin-top:20px;display:flex;gap:12px">
+            <button class="btn btn-primary" onclick="makeReservation()">Confirm Reservation</button>
+            <button class="btn btn-ghost" style="color:var(--text-muted);border-color:#e8ddd4" onclick="clearForm()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Reservations -->
+      <div class="section-card">
+        <div class="section-card-header">
+          <div class="section-card-title">My Reservations</div>
+          <span id="res-count" class="badge badge-gold"></span>
+        </div>
+        <div id="reservations-list"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script src="../js/nav.js"></script>
+<script>
+  const user = initPage('reservation', 'Reservation');
+
+  function populateRoomSelect() {
+    const rooms = Store.getRooms().filter(r => r.available);
+    const sel = document.getElementById('select-room');
+    sel.innerHTML = '<option value="">-- Choose a room --</option>';
+    rooms.forEach(r => {
+      sel.innerHTML += `<option value="${r.roomNumber}" data-price="${r.pricePerNight}">
+        ${r.type} Room #${r.roomNumber} — ${UI.formatCurrency(r.pricePerNight)}/night
+      </option>`;
+    });
+    if (rooms.length === 0) {
+      sel.innerHTML = '<option value="">No available rooms at this time</option>';
+    }
+  }
+
+  function updateCost() {
+    const sel = document.getElementById('select-room');
+    const ci  = document.getElementById('checkin').value;
+    const co  = document.getElementById('checkout').value;
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.dataset.price || !ci || !co) {
+      document.getElementById('cost-box').style.display = 'none'; return;
+    }
+    const nights = Math.ceil((new Date(co) - new Date(ci)) / 86400000);
+    if (nights <= 0) { document.getElementById('cost-box').style.display = 'none'; return; }
+    const total = nights * parseFloat(opt.dataset.price);
+    document.getElementById('cost-amount').textContent = UI.formatCurrency(total);
+    document.getElementById('cost-detail').textContent = `${nights} night${nights>1?'s':''} × ${UI.formatCurrency(parseFloat(opt.dataset.price))}/night`;
+    document.getElementById('cost-box').style.display = 'block';
+  }
+
+  function makeReservation() {
+    const roomNumber = parseInt(document.getElementById('select-room').value);
+    const ci = document.getElementById('checkin').value;
+    const co = document.getElementById('checkout').value;
+    if (!roomNumber) { UI.showToast("Please select a room.", "error"); return; }
+    if (!ci || !co) { UI.showToast('Please fill in all fields.', 'error'); return; }
+    if (new Date(co) <= new Date(ci)) { UI.showToast('Check-out must be after check-in.', 'error'); return; }
+    const nights = Math.ceil((new Date(co) - new Date(ci)) / 86400000);
+    const result = Bookings.create(user, roomNumber, ci, co, nights);
+    if (result.success) {
+      UI.showToast('Reservation confirmed!', 'success');
+      clearForm();
+      populateRoomSelect();
+      renderReservations();
+    } else {
+      UI.showToast(result.message, 'error');
+    }
+  }
+
+  function clearForm() {
+    document.getElementById('select-room').value = '';
+    document.getElementById('checkin').value = '';
+    document.getElementById('checkout').value = '';
+    document.getElementById('cost-box').style.display = 'none';
+  }
+
+  function cancelReservation(id) {
+    if (!confirm('Are you sure you want to cancel this reservation? This cannot be undone.')) return;
+    Bookings.cancel(id);
+    UI.showToast('Reservation cancelled.', 'info');
+    populateRoomSelect();
+    renderReservations();
+  }
+
+  function renderReservations() {
+    const reservations = Bookings.getForUser(user.username);
+    const list = document.getElementById('reservations-list');
+    document.getElementById('res-count').textContent = reservations.length + ' total';
+
+    if (reservations.length === 0) {
+      list.innerHTML = `<div class="empty-res">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d4c4b8" stroke-width="1.2" stroke-linecap="round" style="margin-bottom:10px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <div style="font-size:0.88rem;color:var(--text-muted)">No reservations yet.</div>
+      </div>`; return;
+    }
+
+    const rows = reservations.slice().reverse().map(r => `
+      <tr>
+        <td><strong>#${r.reservationId}</strong></td>
+        <td>${r.roomType} #${r.roomNumber}</td>
+        <td>${UI.formatDate(r.checkIn)}</td>
+        <td>${UI.formatDate(r.checkOut)}</td>
+        <td>${r.nights} night${r.nights>1?'s':''}</td>
+        <td>${UI.formatCurrency(r.totalRoomCost)}</td>
+        <td><span class="badge ${r.status==='CONFIRMED'?'badge-green':r.status==='CANCELLED'?'badge-red':'badge-gold'}">${r.status}</span></td>
+        <td>${r.status==='CONFIRMED'?`<button class="cancel-btn" onclick="cancelReservation(${r.reservationId})">Cancel</button>`:'—'}</td>
+      </tr>`).join('');
+
+    list.innerHTML = `
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>ID</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Cost</th><th>Status</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  // Set today as min date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('checkin').min = today;
+  document.getElementById('checkout').min = today;
+
+  populateRoomSelect();
+  renderReservations();
+</script>
+</body>
+</html>
