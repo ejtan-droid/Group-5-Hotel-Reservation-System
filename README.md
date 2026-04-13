@@ -9,10 +9,10 @@
 
 | Name | Role (OOP) | Role (HCI) |
 |---|---|---|
-| Eldion John T. Tan | Project Lead / Lead Developer | Prototype Developer |
+| Eldion John T. Tan | Lead Developer | UI/UX Designer |
 | Trestan Khian B. Malagkit | UI / Logic Developer | UX Researcher |
-| Shan Louie P. Ortula | UI / Logic Developer | Project Manager / Writer |
-| Denise Margarette D. Sia | Documentation Lead | UI/UX Designer |
+| Shan Louie P. Ortula | Project Lead | Project Manager / Writer |
+| Denise Margarette D. Sia | Documentation Lead | Prototype Developer |
 
 ---
 
@@ -55,14 +55,14 @@ This will run a demo in the terminal showing how the OOP classes work together.
 ```
 AubergeDeGrandeur/
 │
-├── index.html               ← Start here (Login / Register)
+├── index.html               
 │
 ├── frontend/
 │   ├── css/
-│   │   └── style.css        ← All styling
+│   │   └── style.css        
 │   ├── js/
-│   │   ├── app.js           ← All the logic (login, booking, billing)
-│   │   └── nav.js           ← Sidebar and topbar
+│   │   ├── app.js          
+│   │   └── nav.js           
 │   └── pages/
 │       ├── dashboard.html
 │       ├── rooms.html
@@ -76,8 +76,8 @@ AubergeDeGrandeur/
         ├── Person.java
         ├── Guest.java
         ├── Room.java
-        ├── StandardRoom.java  ← also contains DeluxeRoom and SuiteRoom
-        ├── Reservation.java   ← also contains Service and Billing classes
+        ├── StandardRoom.java  
+        ├── Reservation.java  
         ├── Hotel.java
         └── Main.java
 ```
