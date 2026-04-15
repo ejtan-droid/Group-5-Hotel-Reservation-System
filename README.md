@@ -108,4 +108,4 @@ AubergeDeGrandeur/
 
 ### Instructor
 
-Harnelyn Lamson Amar
+Mrs. Harnelyn Lamson Amar
