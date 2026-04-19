@@ -468,7 +468,9 @@
         </div>
         <div class="form-group">
           <label>Phone Number</label>
-          <input type="tel" class="form-control" id="reg-phone" placeholder="09XXXXXXXXX" autocomplete="tel"/>
+          <input type="tel" class="form-control" id="reg-phone" placeholder="09XXXXXXXXX"
+            autocomplete="tel" oninput="validatePhoneHint(this)" maxlength="11"/>
+          <small id="phone-hint" style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;display:block;">Format: 09XXXXXXXXX (11 digits)</small>
         </div>
         <div class="form-group">
           <label>Username</label>
@@ -524,6 +526,15 @@
     if (!username) { document.getElementById('login-username').classList.add('input-error'); UI.showToast('Please enter your username.', 'error'); return; }
     if (!password) { document.getElementById('login-password').classList.add('input-error'); UI.showToast('Please enter your password.', 'error'); return; }
 
+    // Check admin credentials first
+    const adminMatch = Auth.isAdmin(username, password);
+    if (adminMatch) {
+      Auth.setAdminSession(adminMatch);
+      UI.showToast(`Welcome, ${adminMatch.name}!`, 'success');
+      setTimeout(() => { window.location.href = 'frontend/pages/admin.html'; }, 800);
+      return;
+    }
+
     const result = Auth.login(username, password);
     if (result.success) {
       UI.showToast(`Welcome back, ${result.user.firstName}!`, 'success');
@@ -575,13 +586,32 @@
       password:  fields.password.value,
     };
 
+    // Phone number validation
+    if (!isValidPhone(data.contactNumber)) {
+      fields.phone.classList.add('input-error');
+      const hint = document.getElementById('phone-hint');
+      if (hint) { hint.style.color = '#c0392b'; hint.textContent = 'Must be 09XXXXXXXXX — exactly 11 digits'; }
+      UI.showToast('Phone number must start with 09 and be exactly 11 digits.', 'error'); return;
+    }
+
     const result = Auth.register(data);
     if (result.success) {
       UI.showToast('Account created! Please sign in.', 'success');
+      clearRegisterForm();
       setTimeout(() => switchTab('login'), 1000);
     } else {
       UI.showToast(result.message, 'error');
     }
+  }
+
+  function clearRegisterForm() {
+    ['reg-firstname','reg-lastname','reg-email','reg-phone','reg-username','reg-password']
+      .forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.value = ''; el.classList.remove('input-error'); }
+      });
+    const hint = document.getElementById('phone-hint');
+    if (hint) { hint.style.color = 'var(--text-muted)'; hint.textContent = 'Format: 09XXXXXXXXX (11 digits)'; }
   }
 
   document.addEventListener('keydown', e => {
