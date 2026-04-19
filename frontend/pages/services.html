@@ -6,81 +6,30 @@
   <title>Services — Auberge de Grandeur</title>
   <link rel="stylesheet" href="../css/style.css" />
   <style>
-    .services-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 14px;
-      margin-bottom: 28px;
-    }
-    .service-card {
-      background: white;
-      border-radius: var(--radius-md);
-      padding: 22px 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: var(--transition);
-      border: 2px solid #ede4da;
-      box-shadow: 0 2px 8px rgba(91,51,23,0.05);
-      position: relative;
-    }
-    .service-card:hover {
-      border-color: var(--gold);
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(201,168,76,0.14);
-    }
-    .service-card.selected {
-      border-color: var(--gold);
-      background: rgba(201,168,76,0.05);
-    }
-    .service-check {
-      display: none;
-      position: absolute;
-      top: 10px; right: 10px;
-      width: 20px; height: 20px;
-      background: var(--gold);
-      border-radius: 50%;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.65rem;
-      color: var(--brown-dark);
-      font-weight: 700;
-    }
-    .service-card.selected .service-check { display: flex; }
-    .service-icon {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      background: var(--off-white);
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 12px;
-    }
-    .service-icon svg { width: 22px; height: 22px; stroke: var(--brown-warm); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    .service-name { font-family: var(--font-display); font-size: 0.95rem; color: var(--brown-dark); margin-bottom: 4px; }
-    .service-cost { font-size: 0.82rem; color: var(--gold); font-weight: 600; }
-
-    .request-box {
-      background: white;
-      border-radius: var(--radius-md);
-      padding: 26px;
-      box-shadow: 0 2px 12px rgba(91,51,23,0.06);
-      margin-bottom: 28px;
-    }
-    .request-box-title { font-family: var(--font-display); font-size: 1.3rem; color: var(--brown-dark); margin-bottom: 4px; }
-    .request-box-sub   { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 22px; }
-
-    .history-card {
-      background: white;
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      box-shadow: 0 2px 12px rgba(91,51,23,0.06);
-    }
-    .history-header {
-      padding: 18px 26px;
-      border-bottom: 1px solid #f0e8e0;
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      color: var(--brown-dark);
-    }
-    .empty-svc { padding: 40px; text-align: center; font-size: 0.87rem; color: var(--text-muted); }
+    .services-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:14px;margin-bottom:24px;}
+    .service-card{background:white;border-radius:var(--radius-md);padding:22px 16px;text-align:center;cursor:pointer;transition:var(--transition);border:2px solid #ede4da;box-shadow:0 2px 8px rgba(91,51,23,0.05);position:relative;}
+    .service-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 6px 20px rgba(201,168,76,0.14);}
+    .service-card.selected{border-color:var(--gold);background:rgba(201,168,76,0.05);}
+    .service-check{display:none;position:absolute;top:10px;right:10px;width:20px;height:20px;background:var(--gold);border-radius:50%;align-items:center;justify-content:center;font-size:0.65rem;color:var(--brown-dark);font-weight:700;}
+    .service-card.selected .service-check{display:flex;}
+    .service-icon{width:44px;height:44px;border-radius:50%;background:var(--off-white);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+    .service-icon svg{width:22px;height:22px;stroke:var(--brown-warm);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+    .service-name{font-family:var(--font-display);font-size:0.95rem;color:var(--brown-dark);margin-bottom:4px;}
+    .service-cost{font-size:0.82rem;color:var(--gold);font-weight:600;}
+    .request-box{background:white;border-radius:var(--radius-md);padding:26px;box-shadow:0 2px 12px rgba(91,51,23,0.06);margin-bottom:28px;}
+    .request-box-title{font-family:var(--font-display);font-size:1.3rem;color:var(--brown-dark);margin-bottom:4px;}
+    .request-box-sub{font-size:0.82rem;color:var(--text-muted);margin-bottom:22px;}
+    .history-card{background:white;border-radius:var(--radius-md);overflow:hidden;box-shadow:0 2px 12px rgba(91,51,23,0.06);}
+    .history-header{padding:18px 26px;border-bottom:1px solid #f0e8e0;font-family:var(--font-display);font-size:1.1rem;color:var(--brown-dark);}
+    .empty-svc{padding:40px;text-align:center;font-size:0.87rem;color:var(--text-muted);}
+    .edit-svc-btn{background:none;border:1px solid var(--gold);color:var(--gold);padding:5px 12px;border-radius:var(--radius-sm);font-size:0.74rem;cursor:pointer;transition:var(--transition);}
+    .edit-svc-btn:hover{background:var(--gold);color:var(--brown-dark);}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,5,2,0.72);z-index:1000;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal-box{background:white;border-radius:var(--radius-md);padding:32px;width:100%;max-width:440px;margin:20px;position:relative;box-shadow:0 20px 60px rgba(10,5,2,0.4);}
+    .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:1.6rem;color:var(--text-muted);cursor:pointer;line-height:1;}
+    .modal-title{font-family:var(--font-display);font-size:1.4rem;color:var(--brown-dark);margin-bottom:4px;}
+    .modal-sub{font-size:0.82rem;color:var(--text-muted);margin-bottom:20px;}
   </style>
 </head>
 <body>
@@ -92,13 +41,19 @@
 
       <div class="request-box">
         <div class="request-box-title">Request a Service</div>
-        <div class="request-box-sub">Select one or more services then choose your preferred date and submit.</div>
+        <div class="request-box-sub">Select one or more services, choose a date and time, then submit.</div>
 
         <div class="services-grid" id="services-grid"></div>
 
-        <div class="form-group" style="max-width:260px;margin-bottom:20px">
-          <label>Preferred Date</label>
-          <input type="date" class="form-control" id="service-date" />
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+          <div class="form-group" style="flex:1;min-width:160px">
+            <label>Preferred Date</label>
+            <input type="date" class="form-control" id="service-date" />
+          </div>
+          <div class="form-group" style="flex:1;min-width:160px">
+            <label>Preferred Time</label>
+            <select class="form-control" id="service-time"></select>
+          </div>
         </div>
 
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -107,7 +62,6 @@
         </div>
       </div>
 
-      <!-- History -->
       <div class="history-card">
         <div class="history-header">Service History</div>
         <div id="service-history"></div>
@@ -117,88 +71,129 @@
   </div>
 </div>
 
+<!-- Edit Service Modal -->
+<div class="modal-overlay" id="edit-svc-modal" onclick="closeEditSvcModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeEditSvcModal()">×</button>
+    <div class="modal-title">Edit Service Schedule</div>
+    <div class="modal-sub" id="edit-svc-name"></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div class="form-group" style="flex:1;min-width:150px">
+        <label>New Date</label>
+        <input type="date" class="form-control" id="edit-svc-date" />
+      </div>
+      <div class="form-group" style="flex:1;min-width:150px">
+        <label>New Time</label>
+        <select class="form-control" id="edit-svc-time"></select>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="saveEditSvc()">Save Changes</button>
+    <button class="btn btn-full" style="margin-top:8px;background:none;border:1.5px solid #e8ddd4;color:var(--text-muted)" onclick="closeEditSvcModal()">Cancel</button>
+  </div>
+</div>
+
 <script src="../js/app.js"></script>
 <script src="../js/nav.js"></script>
 <script>
-  const user = initPage('services', 'Services');
+  const user = initPage('services','Services');
   const selected = new Set();
+  let editingSvcId = null;
 
-  // SVG icons per service
   const svcIcons = {
-    room_cleaning: `<svg viewBox="0 0 24 24"><path d="M3 9l1-1 16 16-1 1"/><path d="M21 3L3 21"/><path d="M12 6l6 6"/></svg>`,
-    food_service:  `<svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>`,
-    laundry:       `<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><circle cx="12" cy="13" r="4"/><circle cx="18" cy="7" r="1"/></svg>`,
-    airport:       `<svg viewBox="0 0 24 24"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4 19.5 2.5c-1.5-1.5-3.5-1.5-5 0L11 6l-8.2-1.8L1 5.6l6.7 6.1L5.3 17l-1.3 1.4 3.8 1.1 1.1 3.8 1.4-1.3 1.8-3z"/></svg>`,
-    spa:           `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`,
+    room_cleaning:`<svg viewBox="0 0 24 24"><path d="M3 9l1-1 16 16-1 1"/><path d="M21 3L3 21"/><path d="M12 6l6 6"/></svg>`,
+    food_service: `<svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>`,
+    laundry:      `<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2"/><circle cx="12" cy="13" r="4"/><circle cx="18" cy="7" r="1"/></svg>`,
+    airport:      `<svg viewBox="0 0 24 24"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4 19.5 2.5c-1.5-1.5-3.5-1.5-5 0L11 6l-8.2-1.8L1 5.6l6.7 6.1L5.3 17l-1.3 1.4 3.8 1.1 1.1 3.8 1.4-1.3 1.8-3z"/></svg>`,
+    spa:          `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`,
   };
 
+  // Build service cards
   const grid = document.getElementById('services-grid');
   HOTEL.services.forEach(svc => {
     const card = document.createElement('div');
-    card.className = 'service-card';
-    card.dataset.id = svc.id;
-    card.innerHTML = `
-      <div class="service-check">✓</div>
-      <div class="service-icon">${svcIcons[svc.id] || ''}</div>
-      <div class="service-name">${svc.name}</div>
-      <div class="service-cost">${UI.formatCurrency(svc.cost)}</div>
-    `;
-    card.addEventListener('click', () => {
-      if (selected.has(svc.id)) {
-        selected.delete(svc.id);
-        card.classList.remove('selected');
-      } else {
-        selected.add(svc.id);
-        card.classList.add('selected');
-      }
-      const n = selected.size;
-      document.getElementById('selected-count').textContent =
-        n === 0 ? 'No services selected yet' : `${n} service${n > 1 ? 's' : ''} selected`;
+    card.className='service-card'; card.dataset.id=svc.id;
+    card.innerHTML=`<div class="service-check">✓</div><div class="service-icon">${svcIcons[svc.id]||''}</div><div class="service-name">${svc.name}</div><div class="service-cost">${UI.formatCurrency(svc.cost)}</div>`;
+    card.addEventListener('click',()=>{
+      if(selected.has(svc.id)){selected.delete(svc.id);card.classList.remove('selected');}
+      else{selected.add(svc.id);card.classList.add('selected');}
+      const n=selected.size;
+      document.getElementById('selected-count').textContent=n===0?'No services selected yet':`${n} service${n>1?'s':''} selected`;
     });
     grid.appendChild(card);
   });
 
-  // Default date to today
-  document.getElementById('service-date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('service-date').min   = new Date().toISOString().split('T')[0];
+  // Set defaults
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('service-date').value=today;
+  document.getElementById('service-date').min=today;
+  buildTimePicker('service-time',9); // default 9 AM
 
   function submitServices() {
-    if (selected.size === 0) { UI.showToast('Please select at least one service.', 'error'); return; }
-    const date = document.getElementById('service-date').value;
-    if (!date) { UI.showToast('Please pick a date.', 'error'); return; }
-
-    let count = 0;
-    selected.forEach(id => {
-      const res = Services.request(user, id, date);
-      if (res.success) count++;
-    });
-
-    UI.showToast(`${count} service request${count > 1 ? 's' : ''} submitted!`, 'success');
+    if(!selected.size){UI.showToast('Please select at least one service.','error');return;}
+    const date=document.getElementById('service-date').value;
+    const time=document.getElementById('service-time').value;
+    if(!date){UI.showToast('Please pick a date.','error');return;}
+    let count=0;
+    selected.forEach(id=>{const r=Services.request(user,id,date,time);if(r.success)count++;});
+    UI.showToast(`${count} service request${count>1?'s':''} submitted!`,'success');
     selected.clear();
-    document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
-    document.getElementById('selected-count').textContent = 'No services selected yet';
+    document.querySelectorAll('.service-card').forEach(c=>c.classList.remove('selected'));
+    document.getElementById('selected-count').textContent='No services selected yet';
     renderHistory();
   }
 
-  function renderHistory() {
-    const history = Services.getForUser(user.username);
-    const el = document.getElementById('service-history');
-    if (history.length === 0) {
-      el.innerHTML = `<div class="empty-svc">No service requests yet.</div>`;
-      return;
+  // ── Edit Service ──────────────────────────────────────────────
+  function openEditSvcModal(id) {
+    const svcs=Services.getForUser(user.username);
+    const svc=svcs.find(s=>String(s.id)===String(id));
+    if(!svc) return;
+    editingSvcId=id;
+    document.getElementById('edit-svc-name').textContent=`${svc.serviceName} — ${UI.formatCurrency(svc.cost)}`;
+    const t=new Date().toISOString().split('T')[0];
+    document.getElementById('edit-svc-date').value=svc.date;
+    document.getElementById('edit-svc-date').min=t;
+    buildTimePicker('edit-svc-time', parseInt((svc.time||'09:00').split(':')[0]));
+    document.getElementById('edit-svc-time').value=svc.time||'09:00';
+    document.getElementById('edit-svc-modal').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+
+  function saveEditSvc() {
+    const newDate=document.getElementById('edit-svc-date').value;
+    const newTime=document.getElementById('edit-svc-time').value;
+    if(!newDate){UI.showToast('Please pick a date.','error');return;}
+    const svcDate=new Date(newDate+'T00:00:00');
+    const tomorrow=new Date(); tomorrow.setDate(tomorrow.getDate()+1); tomorrow.setHours(0,0,0,0);
+    if(svcDate<=tomorrow){UI.showToast('Cannot schedule for tomorrow or sooner.','error');return;}
+    const result=Services.modify(editingSvcId,newDate,newTime);
+    if(result.success){closeEditSvcModal();UI.showToast('Service schedule updated!','success');renderHistory();}
+    else UI.showToast(result.message,'error');
+  }
+
+  function closeEditSvcModal(e) {
+    if(!e||e.target.id==='edit-svc-modal'){
+      document.getElementById('edit-svc-modal').classList.remove('open');
+      document.body.style.overflow='';
+      editingSvcId=null;
     }
-    const rows = history.slice().reverse().map(s => `
-      <tr>
+  }
+
+  function renderHistory() {
+    const history=Services.getForUser(user.username);
+    const el=document.getElementById('service-history');
+    if(!history.length){el.innerHTML=`<div class="empty-svc">No service requests yet.</div>`;return;}
+    const tomorrow=new Date(); tomorrow.setDate(tomorrow.getDate()+1); tomorrow.setHours(0,0,0,0);
+    const rows=history.slice().reverse().map(s=>{
+      const canEdit=s.status==='PENDING'&&new Date(s.date+'T00:00:00')>tomorrow;
+      return `<tr>
         <td>${s.serviceName}</td>
         <td>${UI.formatCurrency(s.cost)}</td>
-        <td>${UI.formatDate(s.date)}</td>
+        <td>${UI.formatDate(s.date)}<div style="font-size:0.75rem;color:var(--text-muted)">${formatTime(s.time||'09:00')}</div></td>
         <td><span class="badge badge-gold">${s.status}</span></td>
-      </tr>`).join('');
-    el.innerHTML = `
-      <table>
-        <thead><tr><th>Service</th><th>Cost</th><th>Date</th><th>Status</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>`;
+        <td>${canEdit?`<button class="edit-svc-btn" onclick="openEditSvcModal(${JSON.stringify(s.id)})">Edit</button>`:'—'}</td>
+      </tr>`;
+    }).join('');
+    el.innerHTML=`<table><thead><tr><th>Service</th><th>Cost</th><th>Scheduled</th><th>Status</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
   }
 
   renderHistory();
