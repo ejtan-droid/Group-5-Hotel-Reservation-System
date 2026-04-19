@@ -633,7 +633,6 @@ tbody td {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ── Polish Fixes ──────────────────────────────────────────────── */
 .nav-icon svg {
   width: 16px;
   height: 16px;
@@ -643,10 +642,8 @@ tbody td {
 
 .nav-item { gap: 10px; }
 
-/* Better table mobile scroll */
 .table-wrapper { overflow-x: auto; }
 
-/* Smooth page transitions */
 .page-content {
   animation: pageFadeIn 0.25s ease;
 }
@@ -662,14 +659,11 @@ tbody td {
   box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
 }
 
-/* Disabled button style */
 button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-/* Toast z-index fix */
 .toast-container { z-index: 99999; }
 
-/* Modal backdrop fix */
 .modal-overlay { animation: fadeIn 0.2s ease; }
