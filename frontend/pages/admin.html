@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — Auberge de Grandeur</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    /* Admin uses navy sidebar instead of brown */
+    .admin-layout { display:flex; min-height:100vh; }
+    .admin-sidebar {
+      width:240px; min-height:100vh; position:fixed; top:0; left:0;
+      background:linear-gradient(180deg,#0d1b2e 0%,#1a2e4a 100%);
+      border-right:1px solid rgba(201,168,76,0.15);
+      display:flex; flex-direction:column; padding:0; z-index:100;
+    }
+    .admin-logo {
+      padding:28px 20px 20px;
+      display:flex; flex-direction:column; align-items:center; gap:10px;
+      border-bottom:1px solid rgba(201,168,76,0.1);
+    }
+    .admin-logo-circle {
+      width:50px;height:50px;border-radius:50%;
+      background:linear-gradient(135deg,#c9a84c,#8b5e3c);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Georgia',serif;font-size:1.5rem;color:#1a0f07;font-weight:700;
+    }
+    .admin-logo-text { color:#f5e6c8;font-size:0.85rem;font-weight:600;text-align:center;line-height:1.3; }
+    .admin-badge { background:#e74c3c;color:white;font-size:0.62rem;font-weight:700;letter-spacing:0.12em;padding:2px 10px;border-radius:3px;text-transform:uppercase;margin-top:4px; }
+    .admin-nav { padding:16px 0; flex:1; }
+    .admin-nav-item {
+      display:flex;align-items:center;gap:10px;padding:12px 20px;
+      color:rgba(245,230,200,0.6);font-size:0.88rem;cursor:pointer;
+      transition:all 0.2s;border-left:3px solid transparent;
+    }
+    .admin-nav-item:hover { color:#f5e6c8;background:rgba(201,168,76,0.08); }
+    .admin-nav-item.active { color:#c9a84c;background:rgba(201,168,76,0.1);border-left-color:#c9a84c; }
+    .admin-nav-item svg { width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0; }
+    .admin-footer { padding:16px 20px;border-top:1px solid rgba(201,168,76,0.1); }
+    .admin-main { margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh; }
+    .admin-topbar {
+      background:white;border-bottom:1px solid #f0e8e0;
+      padding:0 32px;height:64px;display:flex;align-items:center;justify-content:space-between;
+      position:sticky;top:0;z-index:50;
+    }
+    .admin-topbar-title { font-family:'Georgia',serif;font-size:1.25rem;color:#1a0f07; }
+    .admin-content { padding:32px;flex:1; }
+    .admin-section { display:none; }
+    .admin-section.active { display:block; }
+    .today-highlight { background:#fff8e6 !important; }
+    .status-dot { width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px; }
+    .search-bar { max-width:380px;margin-bottom:20px; }
+    .filter-row { display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap; }
+    .section-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:20px; }
+    .section-title { font-family:'Georgia',serif;font-size:1.3rem;color:#1a0f07; }
+  </style>
+</head>
+<body style="background:#faf6f0">
+<div class="admin-layout">
+
+  <!-- Sidebar -->
+  <div class="admin-sidebar">
+    <div class="admin-logo">
+      <div class="admin-logo-circle">A</div>
+      <div class="admin-logo-text">Auberge de Grandeur</div>
+      <div class="admin-badge">Staff Panel</div>
+    </div>
+    <nav class="admin-nav">
+      <div class="admin-nav-item active" onclick="showSection('dashboard',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="admin-nav-item" onclick="showSection('guests',this)">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Guest Management
+      </div>
+      <div class="admin-nav-item" onclick="showSection('rooms',this)">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Rooms
+      </div>
+      <div class="admin-nav-item" onclick="showSection('reservations',this)">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Reservations
+      </div>
+      <div class="admin-nav-item" onclick="showSection('services',this)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 19.07l1.41-1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+        Services
+      </div>
+      <div class="admin-nav-item" onclick="showSection('billing',this)">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Billing Overview
+      </div>
+    </nav>
+    <div class="admin-footer">
+      <button class="btn btn-ghost btn-sm btn-full" onclick="adminLogout()" style="justify-content:center;gap:8px;color:rgba(245,230,200,0.5);border-color:rgba(201,168,76,0.15)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-topbar-title" id="admin-section-title">Dashboard</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="admin-badge">STAFF</div>
+        <span id="admin-name-display" style="font-size:0.85rem;font-weight:600;color:#1a0f07"></span>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- DASHBOARD -->
+      <div class="admin-section active" id="section-dashboard">
+        <div class="stats-grid" id="admin-stats" style="margin-bottom:28px"></div>
+        <div style="background:white;border-radius:12px;padding:24px;box-shadow:0 2px 12px rgba(91,51,23,0.06)">
+          <div style="font-family:'Georgia',serif;font-size:1.1rem;color:#1a0f07;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #f0e8e0">Recent Activity</div>
+          <div id="admin-activity"></div>
+        </div>
+      </div>
+
+      <!-- GUESTS -->
+      <div class="admin-section" id="section-guests">
+        <div class="section-header">
+          <div class="section-title">Guest Management</div>
+          <span id="guest-total-badge" class="badge badge-gold"></span>
+        </div>
+        <input class="form-control search-bar" id="guest-search" placeholder="Search by name, username or email..." oninput="renderGuests()" />
+        <div id="admin-guests-table"></div>
+      </div>
+
+      <!-- ROOMS -->
+      <div class="admin-section" id="section-rooms">
+        <div class="section-header">
+          <div class="section-title">Room Management</div>
+        </div>
+        <div id="admin-rooms-table"></div>
+      </div>
+
+      <!-- RESERVATIONS -->
+      <div class="admin-section" id="section-reservations">
+        <div class="section-header">
+          <div class="section-title">All Reservations</div>
+        </div>
+        <div class="filter-row">
+          <select class="form-control" id="res-filter" onchange="renderReservations()" style="max-width:200px">
+            <option value="all">All Status</option>
+            <option value="CONFIRMED">Confirmed</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+        <div id="admin-res-table"></div>
+      </div>
+
+      <!-- SERVICES -->
+      <div class="admin-section" id="section-services">
+        <div class="section-header">
+          <div class="section-title">Service Requests</div>
+        </div>
+        <div class="filter-row">
+          <select class="form-control" id="svc-filter" onchange="renderServices()" style="max-width:200px">
+            <option value="all">All Status</option>
+            <option value="PENDING">Pending</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="COMPLETED">Completed</option>
+          </select>
+        </div>
+        <div id="admin-svc-table"></div>
+      </div>
+
+      <!-- BILLING -->
+      <div class="admin-section" id="section-billing">
+        <div class="section-header">
+          <div class="section-title">Billing Overview</div>
+        </div>
+        <div class="stats-grid" id="admin-revenue" style="margin-bottom:28px"></div>
+        <div id="admin-billing-table"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script>
+  // Require admin session
+  const admin = Auth.requireAdmin();
+  if (admin) document.getElementById('admin-name-display').textContent = admin.name;
+
+  const sectionTitles = {
+    dashboard:'Dashboard', guests:'Guest Management', rooms:'Room Management',
+    reservations:'Reservations', services:'Service Requests', billing:'Billing Overview'
+  };
+
+  function showSection(name, el) {
+    document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.admin-nav-item').forEach(l=>l.classList.remove('active'));
+    document.getElementById('section-'+name).classList.add('active');
+    if(el) el.classList.add('active');
+    document.getElementById('admin-section-title').textContent=sectionTitles[name]||name;
+    const fns={dashboard:renderDashboard,guests:renderGuests,rooms:renderRooms,reservations:renderReservations,services:renderServices,billing:renderBilling};
+    if(fns[name]) fns[name]();
+  }
+
+  // ── Format helpers ────────────────────────────────────────────
+  const fmtDate = d => d ? new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+  const fmtCur  = a => '$'+Number(a).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  const fmtTime = t => { if(!t) return ''; const h=parseInt(t.split(':')[0]); const ampm=h<12?'AM':'PM'; const hr=h===12?12:h>12?h-12:h; return `${hr}:00 ${ampm}`; };
+
+  function toast(msg,type='info') {
+    let c=document.querySelector('.toast-container');
+    if(!c){c=document.createElement('div');c.className='toast-container';document.body.appendChild(c);}
+    const t=document.createElement('div'); t.className=`toast toast-${type}`;
+    t.innerHTML=`<span style="font-weight:700">${{success:'✓',error:'✕',info:'i'}[type]||'i'}</span><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(10px)';t.style.transition='all 0.3s';setTimeout(()=>t.remove(),300);},3500);
+  }
+
+  // ── Dashboard ─────────────────────────────────────────────────
+  function renderDashboard() {
+    const users  = Store.getUsers();
+    const rooms  = Store.getRooms();
+    const res    = Store.getReservations();
+    const svcs   = Store.getServices();
+    const avail  = rooms.filter(r=>r.available).length;
+    const active = res.filter(r=>r.status==='CONFIRMED').length;
+    const revenue= res.filter(r=>r.status==='CONFIRMED').reduce((s,r)=>s+r.totalRoomCost,0)
+                 + svcs.filter(s=>s.status==='COMPLETED').reduce((s,sv)=>s+sv.cost,0);
+
+    document.getElementById('admin-stats').innerHTML=`
+      <div class="stat-card"><div class="stat-number">${users.length}</div><div class="stat-label">Registered Guests</div></div>
+      <div class="stat-card" style="border-left-color:var(--brown-light)"><div class="stat-number">${avail}/${rooms.length}</div><div class="stat-label">Rooms Available</div></div>
+      <div class="stat-card" style="border-left-color:#27ae60"><div class="stat-number">${active}</div><div class="stat-label">Active Reservations</div></div>
+      <div class="stat-card" style="border-left-color:var(--gold)"><div class="stat-number">${fmtCur(revenue)}</div><div class="stat-label">Total Revenue</div></div>
+    `;
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const recent   = [...res].reverse().slice(0,6);
+    document.getElementById('admin-activity').innerHTML = recent.length===0
+      ? '<p style="color:var(--text-muted);font-size:0.9rem">No activity yet.</p>'
+      : recent.map(r=>`
+        <div style="padding:10px 0;border-bottom:1px solid #f0e8e0;display:flex;justify-content:space-between;align-items:center${r.checkIn===todayStr||r.checkOut===todayStr?';background:#fff8e6;padding:10px 12px;border-radius:6px;margin-bottom:4px':''}">
+          <div>
+            <span style="font-weight:600">${r.guestName}</span>
+            <span style="color:var(--text-muted);margin:0 6px">—</span>
+            ${r.roomType} #${r.roomNumber}
+            ${r.checkIn===todayStr?'<span style="background:#e8f5e9;color:#27ae60;font-size:0.7rem;padding:2px 8px;border-radius:10px;margin-left:6px">CHECK-IN TODAY</span>':''}
+            ${r.checkOut===todayStr?'<span style="background:#fff3e0;color:#e67e22;font-size:0.7rem;padding:2px 8px;border-radius:10px;margin-left:6px">CHECK-OUT TODAY</span>':''}
+          </div>
+          <span class="badge ${r.status==='CONFIRMED'?'badge-green':'badge-red'}">${r.status}</span>
+        </div>`).join('');
+  }
+
+  // ── Guests ────────────────────────────────────────────────────
+  function renderGuests() {
+    const search = (document.getElementById('guest-search')?.value||'').toLowerCase();
+    let users = Store.getUsers();
+    if(search) users=users.filter(u=>`${u.firstName} ${u.lastName} ${u.username} ${u.email}`.toLowerCase().includes(search));
+    document.getElementById('guest-total-badge').textContent=users.length+' guests';
+    const allRes=Store.getReservations(); const allSvc=Store.getServices();
+    const rows=users.map((u,i)=>{
+      const ur=allRes.filter(r=>r.username===u.username);
+      const us=allSvc.filter(s=>s.username===u.username);
+      const spent=ur.reduce((s,r)=>s+r.totalRoomCost,0)+us.reduce((s,sv)=>s+sv.cost,0);
+      return `<tr>
+        <td><strong>${u.firstName} ${u.lastName}</strong></td>
+        <td>${u.username}</td>
+        <td>${u.email}</td>
+        <td>${u.contactNumber||'—'}</td>
+        <td>${ur.length}</td>
+        <td>${fmtCur(spent)}</td>
+        <td>${u.createdAt?new Date(u.createdAt).toLocaleDateString():'—'}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('admin-guests-table').innerHTML=`
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Phone</th><th>Reservations</th><th>Total Spent</th><th>Joined</th></tr></thead>
+        <tbody>${rows||`<tr><td colspan="7" style="text-align:center;padding:36px;color:var(--text-muted)">No guests found.</td></tr>`}</tbody>
+      </table></div>`;
+  }
+
+  // ── Rooms ─────────────────────────────────────────────────────
+  function renderRooms() {
+    const rooms=Store.getRooms(); const allRes=Store.getReservations();
+    const rows=rooms.map(r=>{
+      const activeRes=allRes.find(res=>res.roomNumber===r.roomNumber&&res.status==='CONFIRMED');
+      return `<tr>
+        <td><strong>#${r.roomNumber}</strong></td>
+        <td>${r.type}</td>
+        <td>${fmtCur(r.pricePerNight)}/night</td>
+        <td>${r.capacity} guests</td>
+        <td><span class="badge ${r.available?'badge-green':'badge-red'}">${r.available?'Available':'Occupied'}</span></td>
+        <td style="font-size:0.85rem">${activeRes?`${activeRes.guestName}<div style="font-size:0.75rem;color:var(--text-muted)">Until ${fmtDate(activeRes.checkOut)}</div>`:'—'}</td>
+        <td><button class="btn btn-outline btn-sm" onclick="toggleRoom(${r.roomNumber})">${r.available?'Mark Unavailable':'Mark Available'}</button></td>
+      </tr>`;
+    }).join('');
+    document.getElementById('admin-rooms-table').innerHTML=`
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Room</th><th>Type</th><th>Price</th><th>Capacity</th><th>Status</th><th>Current Guest</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+  }
+
+  function toggleRoom(roomNumber) {
+    const rooms=Store.getRooms(); const idx=rooms.findIndex(r=>r.roomNumber===roomNumber);
+    if(idx===-1) return;
+    const hasActive=Store.getReservations().some(r=>r.roomNumber===roomNumber&&r.status==='CONFIRMED');
+    if(hasActive&&rooms[idx].available){toast('This room has an active reservation. Cancel it first.','error');return;}
+    rooms[idx].available=!rooms[idx].available;
+    Store.saveRooms(rooms);
+    toast('Room status updated.','info');
+    renderRooms();
+  }
+
+  // ── Reservations ──────────────────────────────────────────────
+  function renderReservations() {
+    const filter=document.getElementById('res-filter')?.value||'all';
+    let res=Store.getReservations();
+    if(filter!=='all') res=res.filter(r=>r.status===filter);
+    res=res.slice().reverse();
+    const todayStr=new Date().toISOString().split('T')[0];
+    const rows=res.map(r=>{
+      const isToday=r.checkIn===todayStr||r.checkOut===todayStr;
+      return `<tr class="${isToday?'today-highlight':''}">
+        <td><strong>#${r.reservationId}</strong></td>
+        <td>${r.guestName}</td>
+        <td>${r.roomType} #${r.roomNumber}</td>
+        <td>${fmtDate(r.checkIn)}<div style="font-size:0.75rem;color:var(--text-muted)">${fmtTime(r.checkInTime||'14:00')}</div></td>
+        <td>${fmtDate(r.checkOut)}<div style="font-size:0.75rem;color:var(--text-muted)">${fmtTime(r.checkOutTime||'12:00')}</div></td>
+        <td>${r.nights}n</td>
+        <td>${fmtCur(r.totalRoomCost)}</td>
+        <td><span class="badge ${r.status==='CONFIRMED'?'badge-green':'badge-red'}">${r.status}</span></td>
+        <td>${r.status==='CONFIRMED'?`<button class="btn btn-outline btn-sm" style="border-color:#e74c3c;color:#e74c3c" onclick="adminCancelRes(${r.reservationId})">Cancel</button>`:'—'}</td>
+      </tr>`;
+    }).join('');
+    document.getElementById('admin-res-table').innerHTML=`
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>ID</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Nights</th><th>Cost</th><th>Status</th><th></th></tr></thead>
+        <tbody>${rows||`<tr><td colspan="9" style="text-align:center;padding:36px;color:var(--text-muted)">No reservations found.</td></tr>`}</tbody>
+      </table></div>`;
+  }
+
+  function adminCancelRes(id) {
+    if(!confirm('Cancel this reservation on behalf of the guest?')) return;
+    Bookings.cancel(id);
+    toast('Reservation cancelled.','info');
+    renderReservations(); renderDashboard();
+  }
+
+  // ── Services ──────────────────────────────────────────────────
+  function renderServices() {
+    const filter=document.getElementById('svc-filter')?.value||'all';
+    let svcs=Store.getServices();
+    if(filter!=='all') svcs=svcs.filter(s=>s.status===filter);
+    svcs=svcs.slice().reverse();
+    const rows=svcs.map(s=>`<tr>
+      <td>${s.guestName||s.username}</td>
+      <td>${s.serviceName}</td>
+      <td>${fmtCur(s.cost)}</td>
+      <td>${fmtDate(s.date)}<div style="font-size:0.75rem;color:var(--text-muted)">${fmtTime(s.time||'09:00')}</div></td>
+      <td><span class="badge badge-gold">${s.status}</span></td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        ${s.status==='PENDING'?`<button class="btn btn-outline btn-sm" style="border-color:var(--gold);color:var(--gold)" onclick="updateSvcStatus(${JSON.stringify(s.id)},'IN_PROGRESS')">Start</button>`:''}
+        ${s.status==='IN_PROGRESS'?`<button class="btn btn-outline btn-sm" style="border-color:#27ae60;color:#27ae60" onclick="updateSvcStatus(${JSON.stringify(s.id)},'COMPLETED')">Complete</button>`:''}
+      </td>
+    </tr>`).join('');
+    document.getElementById('admin-svc-table').innerHTML=`
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Guest</th><th>Service</th><th>Cost</th><th>Scheduled</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>${rows||`<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--text-muted)">No service requests found.</td></tr>`}</tbody>
+      </table></div>`;
+  }
+
+  function updateSvcStatus(id, status) {
+    Services.updateStatus(id, status);
+    toast(`Service marked as ${status}.`,'success');
+    renderServices();
+  }
+
+  // ── Billing ───────────────────────────────────────────────────
+  function renderBilling() {
+    const res    = Store.getReservations().filter(r=>r.status==='CONFIRMED');
+    const svcs   = Store.getServices().filter(s=>s.status==='COMPLETED');
+    const roomRev= res.reduce((s,r)=>s+r.totalRoomCost,0);
+    const svcRev = svcs.reduce((s,sv)=>s+sv.cost,0);
+    document.getElementById('admin-revenue').innerHTML=`
+      <div class="stat-card"><div class="stat-number">${fmtCur(roomRev)}</div><div class="stat-label">Room Revenue</div></div>
+      <div class="stat-card" style="border-left-color:#27ae60"><div class="stat-number">${fmtCur(svcRev)}</div><div class="stat-label">Service Revenue</div></div>
+      <div class="stat-card" style="border-left-color:var(--gold)"><div class="stat-number">${fmtCur(roomRev+svcRev)}</div><div class="stat-label">Grand Total</div></div>
+    `;
+    const users  = Store.getUsers();
+    const allRes = Store.getReservations();
+    const allSvc = Store.getServices();
+    const rows=users.map(u=>{
+      const ur=allRes.filter(r=>r.username===u.username&&r.status==='CONFIRMED');
+      const us=allSvc.filter(s=>s.username===u.username&&s.status==='COMPLETED');
+      const rTotal=ur.reduce((s,r)=>s+r.totalRoomCost,0);
+      const sTotal=us.reduce((s,sv)=>s+sv.cost,0);
+      if(rTotal+sTotal===0) return '';
+      return `<tr>
+        <td><strong>${u.firstName} ${u.lastName}</strong></td>
+        <td>${u.username}</td>
+        <td>${fmtCur(rTotal)}</td>
+        <td>${fmtCur(sTotal)}</td>
+        <td><strong>${fmtCur(rTotal+sTotal)}</strong></td>
+      </tr>`;
+    }).filter(Boolean).join('');
+    document.getElementById('admin-billing-table').innerHTML=`
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Guest</th><th>Username</th><th>Room Charges</th><th>Service Charges</th><th>Total</th></tr></thead>
+        <tbody>${rows||`<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--text-muted)">No billing data yet.</td></tr>`}</tbody>
+      </table></div>`;
+  }
+
+  function adminLogout() {
+    if(!confirm('Sign out of the admin panel?')) return;
+    Auth.logoutAdmin();
+    window.location.href='../../index.html';
+  }
+
+  // Init
+  renderDashboard();
+</script>
+</body>
+</html>
