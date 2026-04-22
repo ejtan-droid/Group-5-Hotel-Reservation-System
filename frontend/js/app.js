@@ -1,7 +1,6 @@
 /**
  * Auberge de Grandeur — Hotel Reservation System
  * Frontend Data Store (localStorage — Phase 1)
- * Group 5 | BSCS 2A | Academic Year 2025-2026
  */
 const API = "http://localhost/auberge/api";
 
