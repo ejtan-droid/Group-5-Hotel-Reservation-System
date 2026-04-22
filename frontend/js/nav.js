@@ -1,6 +1,5 @@
 /**
  * Shared navigation component
- * Auberge de Grandeur | Group 5 BSCS 2A
  */
 
 const NAV_ICONS = {
@@ -80,6 +79,5 @@ function handleLogout() {
   if (!confirm('Sign out of your account?')) return;
   Store.logout();
   UI.showToast('Signed out successfully.', 'info');
-  // Works from any page depth since pages are in frontend/pages/
   setTimeout(() => { window.location.href = '../../index.html'; }, 600);
 }
