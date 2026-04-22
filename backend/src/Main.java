@@ -4,9 +4,6 @@ import java.util.List;
  * Main.java
  * This is the entry point for the Java backend demo.
  * Run this to see all OOP concepts working together in the terminal.
- *
- * Group 5 - BSCS 2A | Object-Oriented Programming
- * Academic Year 2025-2026
  */
 public class Main {
 
@@ -21,8 +18,6 @@ public class Main {
         Hotel hotel = new Hotel("Auberge de Grandeur");
 
         // --- Register two guests ---
-        // This shows Encapsulation — the Guest object holds
-        // all the guest data privately and we access it through methods
         Guest guest1 = new Guest("Maria", "Santos", "maria@gmail.com",
                                   "09171234567", "maria_s", "pass1234");
         Guest guest2 = new Guest("Juan", "Dela Cruz", "juan@gmail.com",
@@ -33,9 +28,6 @@ public class Main {
         System.out.println("2 guests registered.\n");
 
         // --- Show available rooms ---
-        // This shows Polymorphism — Room references point to
-        // StandardRoom, DeluxeRoom, or SuiteRoom objects
-        // and displayDetails() behaves differently for each
         System.out.println("--- Available Rooms ---");
         for (Room r : hotel.getAvailableRooms()) {
             r.displayDetails();
@@ -43,11 +35,10 @@ public class Main {
         }
 
         // --- Login ---
-        // validatePassword() is inside Person class — Encapsulation
         Guest loggedIn = hotel.login("maria_s", "pass1234");
         if (loggedIn != null) {
             System.out.println("Login successful!");
-            loggedIn.displayProfile(); // Polymorphism — overrides abstract method from Person
+            loggedIn.displayProfile();
             System.out.println();
         }
 
